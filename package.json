@@ -1,0 +1,23 @@
+{
+  "name": "radar-varons",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "dev:ingest": "wrangler dev --config apps/radar-worker/wrangler.ingest.jsonc",
+    "dev:ops": "wrangler dev --config apps/radar-worker/wrangler.ops.jsonc",
+    "deploy:ingest": "wrangler deploy --config apps/radar-worker/wrangler.ingest.jsonc",
+    "deploy:ops": "wrangler deploy --config apps/radar-worker/wrangler.ops.jsonc",
+    "types:ingest": "wrangler types --config apps/radar-worker/wrangler.ingest.jsonc",
+    "types:ops": "wrangler types --config apps/radar-worker/wrangler.ops.jsonc"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261022.1",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.151.3"
+  }
+}

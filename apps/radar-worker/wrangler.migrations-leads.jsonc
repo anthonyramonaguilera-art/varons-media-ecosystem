@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "radar-migrations-leads",
+  "d1_databases": [
+    {
+      "binding": "LEADS_DB",
+      "database_name": "varons_leads_db",
+      "database_id": "254e9d87-7f66-49f1-aecd-45b603d7f05f",
+      "migrations_dir": "migrations/leads"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "radar-ingest",
+  "main": "src/ingest.ts",
+  "compatibility_date": "2026-10-01",
+  "vars": {
+    "DRY_RUN": "true"
+  },
+  "triggers": {
+    "crons": [
+      "*/30 * * * *" // Modo estrés Fase 0 (336 muestras CPU en 7 días)
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "RADAR_DB",
+      "database_name": "varons_radar_db",
+      "database_id": "985cf1e9-a61d-48b9-8352-84485000f1b3",
+      "migrations_dir": "migrations/radar"
+    }
+    // SEGURIDAD FASE 0: La base varons_leads_db (TU_ID_LEADS_DB) NO se enlaza a este Worker.
+  ]
+}
