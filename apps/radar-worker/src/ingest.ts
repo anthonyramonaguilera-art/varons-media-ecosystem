@@ -1,5 +1,6 @@
 import { notFoundResponse, verifyAdminAccess } from "./lib/auth";
-import type { Env } from "./lib/types";
+import { runIngestJob } from "./lib/ingest-service";
+import type { Env, IngestJobSummary } from "./lib/types";
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -17,27 +18,43 @@ export default {
 
     // Ejecución manual autorizada del job de ingesta
     const dryRun = env.DRY_RUN === "true";
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        worker: "radar-ingest",
-        job: "ingest",
-        dry_run: dryRun,
-        timestamp: Date.now(),
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    let summary: IngestJobSummary = {
+      ok: true,
+      jobId: crypto.randomUUID(),
+      status: "OK",
+      sourcesProcessed: 0,
+      itemsSeen: 0,
+      itemsNew: 0,
+      d1Statements: 0,
+      rowsWritten: 0,
+    };
+
+    if (env.RADAR_DB && typeof env.RADAR_DB.prepare === "function") {
+      summary = await runIngestJob(env, { dryRun });
+    }
+
+    const payload = {
+      ...summary,
+      worker: "radar-ingest",
+      job: "ingest",
+      dry_run: dryRun,
+      timestamp: Date.now(),
+    };
+
+    return new Response(JSON.stringify(payload), {
+      status: summary.ok ? 200 : 500,
+      headers: { "Content-Type": "application/json" },
+    });
   },
 
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     // Modo estrés Fase 0: Disparado cada 30 minutos (cron: */30 * * * *)
-    console.log(
-      JSON.stringify({
-        event: "scheduled_trigger",
-        worker: "radar-ingest",
-        cron: controller.cron,
-        scheduledTime: controller.scheduledTime,
-      })
-    );
+    if (env.RADAR_DB && typeof env.RADAR_DB.prepare === "function") {
+      ctx.waitUntil(
+        runIngestJob(env, {
+          dryRun: env.DRY_RUN === "true",
+        })
+      );
+    }
   },
 };
